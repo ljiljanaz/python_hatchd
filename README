@@ -18,4 +18,8 @@ To test all requirements, there is Postman collection in separate folder.
 GET request to get all boking for a given date (example "BookingDate": "2022-06-01")
 POST requests - to book a parking bay if all requirements are satisfied
 	     - examples where a customer is rejected if some of the requiremnts is not satisfied
+	     
+Some assumtions also have been made:
+- A customer will send only valid data to book a parking - valid date format, name as a string and license plate as a string ( so no check have been done here)
+
 
