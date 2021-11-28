@@ -11,7 +11,6 @@ from datetime import datetime, timedelta, date
 # Create your views here.
 
 def requirements24_check(customer_data):
-    #last_24hour_time = datetime.now() - timedelta(hours = 24)
     datetime_object = datetime.strptime(customer_data['BookingDate'],"%Y-%m-%d").date()
     if not(datetime_object > date.today()):
         return True
@@ -26,11 +25,10 @@ def oneBookingAday_check(park_wish_serializer,parking_data):
         return True
 
 def bookParkingLot(parking_data):
-    print(parking_data)
     parking = ParkingLot.objects.get(BookingDate=parking_data['BookingDate'])
     parking_serializer = ParkingLotSerializer(parking, many=True)
     new_park = parking_data['DriverName']+"; plate-"+parking_data['LicensePlate']+"; TimeOfBooking- "+str(datetime.now())
-    #print(new_park)
+    
     if (parking.Lot_2 ==''):
         parking.Lot_2 = new_park
         parking.save()
@@ -47,15 +45,15 @@ def bookParkingLot(parking_data):
     parking_serializer = ParkingLotSerializer(data=parking, many=True)
     if parking_serializer.is_valid():
         parking_serializer.save()
-    return JsonResponse("Done nicelly", safe=False)
+    return JsonResponse("Done", safe=False)
     
 
 
 @csrf_exempt
 def parkingApi(request):
     # Get the list of all parking lots for a given day with their status.
-    # if a lot is booked it contains license plate; if it is available will be 
-    # empty string.
+    # if a lot is booked it contains Driver Name, license plate and time of booking; 
+    # if it is available will be empty string.
     if request.method == 'GET':
         parking_data = JSONParser().parse(request)
         try:
@@ -67,10 +65,11 @@ def parkingApi(request):
 
     elif request.method == 'POST':
         parking_data = JSONParser().parse(request)
-        # If there is no record with given date, we will create another one in 
+        # If there is no record with given date, we will create a new one in 
         # ParkingLot table and assign Lot_1 to the customer. All other lots 
         # will be set to free at this moment. 
         if not(ParkingLot.objects.filter(BookingDate=parking_data['BookingDate']).exists()):
+            # Check if a customer tries booking at least 24hrs in advance
             if (requirements24_check(parking_data)):
                 return JsonResponse("You must book at least 24h in advance ", safe=False)
 
@@ -78,18 +77,19 @@ def parkingApi(request):
             p_serializer=ParkingLotSerializer(data=p)
             if p_serializer.is_valid():
                 p_serializer.save()
-            p1 = Parking_1.objects.create(BookingDate=parking_data['BookingDate'],TimeOfBooking=datetime.now(),DriverName=parking_data['DriverName'], LicensePlate=parking_data['LicensePlate'])
-            p1_serializer=Parking_1Serializer(data=p1)
-            if p1_serializer.is_valid():
-                p1_serializer.save()
+            #p1 = Parking_1.objects.create(BookingDate=parking_data['BookingDate'],TimeOfBooking=datetime.now(),DriverName=parking_data['DriverName'], LicensePlate=parking_data['LicensePlate'])
+            #p1_serializer=Parking_1Serializer(data=p1)
+            #if p1_serializer.is_valid():
+            #    p1_serializer.save()
             return JsonResponse("Booked successfully", safe=False)
         else: 
-            print('Here 1')
+            
             # If all lots are full for the required date, we will notify a customer
             # to select another day.
             parking = ParkingLot.objects.filter(BookingDate=parking_data['BookingDate'])
             parking_serializer = ParkingLotSerializer(parking,many=True)
 
+            # Check if all parking bays are booked already.
             if ((parking_serializer.data[0]['Lot_1']!='' and parking_serializer.data[0]['Lot_2']!='' and parking_serializer.data[0]['Lot_3']!='' and parking_serializer.data[0]['Lot_4']!='')):
                 return JsonResponse("We are full on that day. Please select another day.",safe=False)
 
@@ -100,7 +100,7 @@ def parkingApi(request):
                 # Check if the customer already booked within 24 hrs
             if (requirements24_check(parking_data)):
                 return JsonResponse("You must book at least 24h in advance ", safe=False)
-    
+            # If a customer already passed all other checks, book one of vailable parking bay for him
             if (bookParkingLot(parking_data)):
                 return JsonResponse("Booked a bay successfully", safe=False)
             

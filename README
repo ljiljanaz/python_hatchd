@@ -1,0 +1,21 @@
+The project has been done in Python3.8.9 and Django. 
+Base dir is ~/parking dir where virtual env is activated and all other dirs and files are located. Sqlite3 is used to store all data. 
+- Go to folder ./parking/
+- And activate virtual env: $source ./bin/activate
+- run: $pip install -r requirements.txt
+- Change dir to ParkingAPI:  $cd ParkingAPI/
+
+""""
+Not sure if those two commands are required as models and data are already migrated
+$ python manage.py makemigrations BookingApp
+$python manage.py migrate BookingApp
+"""
+
+- And run server: $python manage.py runserver
+The server will start at localhost port 8000 (http://127.0.0.1:8000/)
+
+To test all requirements, there is Postman collection in separate folder.
+GET request to get all boking for a given date (example "BookingDate": "2022-06-01")
+POST requests - to book a parking bay if all requirements are satisfied
+	     - examples where a customer is rejected if some of the requiremnts is not satisfied
+
