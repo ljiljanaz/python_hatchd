@@ -21,5 +21,7 @@ POST requests - to book a parking bay if all requirements are satisfied
 	     
 Some assumtions also have been made:
 - A customer will send only valid data to book a parking - valid date format, name as a string and license plate as a string ( so no check have been done here)
+- User authentication has not been implemented - assumed a user's data is genuine 
+- http protocol has been implemeted (https should be used in production env)
 
 
